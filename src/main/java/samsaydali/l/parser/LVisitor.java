@@ -10,26 +10,25 @@ import samsaydali.l.ast.variables.VariableAssign;
 import samsaydali.l.ast.variables.VariableDef;
 import samsaydali.l.gen.LBaseVisitor;
 import samsaydali.l.gen.LParser;
-import samsaydali.l.services.Scope;
+import samsaydali.l.services.scope.ScopeService;
 
 import java.util.LinkedList;
 import java.util.List;
 
 public class LVisitor extends LBaseVisitor {
 
-    List<Statement> statements = new LinkedList<>();
-    Statement currentStatement;
-    Scope scope = new Scope();
+    public List<Statement> statements = new LinkedList<>();
+    ScopeService scope = new ScopeService();
 
     @Override
     public Object visitStatement(LParser.StatementContext ctx) {
         Object result = super.visitStatement(ctx);
-        statements.add(currentStatement);
+        statements.add((Statement) result);
         return result;
     }
 
     @Override
-    public Object visitVariable_def(LParser.Variable_defContext ctx) {
+    public Statement visitVariable_def(LParser.Variable_defContext ctx) {
         VariableDef.VariableDefBuilder builder = VariableDef.builder();
 
         // Add the identifier
@@ -44,37 +43,34 @@ public class LVisitor extends LBaseVisitor {
             builder.assign(assign);
         }
 
-        currentStatement = builder.build();
-
-        return null;
+        return builder.build();
     }
 
     @Override
-    public Object visitVariable_assign(LParser.Variable_assignContext ctx) {
+    public Statement visitVariable_assign(LParser.Variable_assignContext ctx) {
         Identifier identifier = scope.getIdentifier(ctx.ID().getText());
         Assign assign = buildAssign(ctx.assign(), identifier.getType());
-        currentStatement = new VariableAssign(identifier, assign);
-        return null;
+        return new VariableAssign(identifier, assign);
     }
 
     @Override
-    public Object visitFunction_def(LParser.Function_defContext ctx) {
+    public Statement visitFunction_def(LParser.Function_defContext ctx) {
         String name = ctx.ID().getText();
         List<Parameter> parameters = new LinkedList<>();
+        scope.openScope();
         for (int i = 0; i < ctx.parameters().parameter().size(); i++) {
             LParser.ParameterContext pc = ctx.parameters().parameter().get(i);
             Identifier identifier = new Identifier(pc.ID().getText(), new Type(pc.type().getText()));
+            scope.addIdentifier(identifier);
             parameters.add(new Parameter(identifier, i));
         }
         Assign assign = buildAssign(ctx.assign(), new Type(ctx.type().getText()));
-        FunctionDef functionDef = new FunctionDef(name, parameters, assign);
-        scope.addFunctionDef(functionDef);
-        currentStatement = functionDef;
-        return null;
+        scope.closeScope();
+        return new FunctionDef(name, parameters, assign);
     }
 
     @Override
-    public Object visitFunction_call(LParser.Function_callContext ctx) {
+    public Statement visitFunction_call(LParser.Function_callContext ctx) {
         String name = ctx.ID().getText();
         List<Argument> arguments = new LinkedList<>();
         for (int i = 0; i < ctx.arguments().argument().size(); i++) {
@@ -82,9 +78,7 @@ public class LVisitor extends LBaseVisitor {
             Expression expression = buildExpression(arg.expression());
             arguments.add(new Argument(i, expression));
         }
-        FunctionCall functionCall = new FunctionCall(name, arguments);
-        currentStatement = functionCall;
-        return null;
+        return new FunctionCall(name, arguments);
     }
 
     private Assign buildAssign(LParser.AssignContext ctx, Type type) {

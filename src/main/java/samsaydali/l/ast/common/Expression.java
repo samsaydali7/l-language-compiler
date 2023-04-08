@@ -2,8 +2,7 @@ package samsaydali.l.ast.common;
 
 import lombok.*;
 
-@Builder @NoArgsConstructor
-@Setter @Getter
+@Builder @Setter @Getter
 public class Expression {
     ExpressionType expressionType;
     Identifier ID;
