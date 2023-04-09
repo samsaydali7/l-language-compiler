@@ -1,7 +1,8 @@
 package samsaydali.l.parser;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.Test;
+import samsaydali.l.ast.common.Assign;
+import samsaydali.l.ast.common.Expression;
 import samsaydali.l.ast.common.Identifier;
 import samsaydali.l.ast.common.Type;
 import samsaydali.l.ast.functions.FunctionDef;
@@ -10,8 +11,7 @@ import samsaydali.l.ast.functions.Parameter;
 import java.util.LinkedList;
 import java.util.List;
 
-import static org.junit.Assert.*;
-import static org.hamcrest.CoreMatchers.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 class LParserAppTest {
@@ -22,16 +22,41 @@ class LParserAppTest {
     String input4 = "mul[x, (y+2)];\n";
 
     @Test
-    void parseInput() {
+    void parseInput1() {
         LParserApp app = new LParserApp();
         LVisitor v = app.parse(input1);
         FunctionDef functionDef = (FunctionDef) v.statements.get(0);
-        assertEquals("mul", functionDef.getName());
+
+        // Compare func name
+        assertThat("mul").isEqualTo(functionDef.getName());
+
+        Identifier x = new Identifier("x", new Type("Int"));
+        Identifier y = new Identifier("y", new Type("Int"));
+        // Compare parameters
         List<Parameter> parameters = new LinkedList(){{
-            add(new Parameter(new Identifier("x", new Type("Int")), 0));
-            add(new Parameter(new Identifier("y", new Type("Int")), 1));
+            add(new Parameter(x, 0));
+            add(new Parameter(y, 1));
         }};
-        assertThat(parameters, CoreMatchers.hasItems(functionDef.getParameters()));
+        assertThat(functionDef.getParameters()).usingRecursiveFieldByFieldElementComparator().hasSameElementsAs(parameters);
+        // Compare assign
+        Expression e = Expression.builder()
+                .expressionType(Expression.ExpressionType.BINARY)
+                .op("*")
+                .lhs(
+                        Expression.builder()
+                                .expressionType(Expression.ExpressionType.ID)
+                                .ID(x)
+                                .build()
+                )
+                .rhs(
+                        Expression.builder()
+                                .expressionType(Expression.ExpressionType.ID)
+                                .ID(y)
+                                .build()
+                )
+                .build();
+        Assign a = new Assign(new Type("Int"), e);
+        assertThat(functionDef.getAssign()).usingRecursiveComparison().isEqualTo(a);
     }
 
     @Test
