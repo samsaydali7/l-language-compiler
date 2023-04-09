@@ -13,7 +13,7 @@ public class LParserApp {
         LParser parser = new LParser(tokens);
 
         LVisitor visitor = new LVisitor();
-        parser.statement().accept(visitor);
+        parser.l().accept(visitor);
 
         return visitor;
     }
