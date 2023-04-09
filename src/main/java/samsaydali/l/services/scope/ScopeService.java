@@ -1,6 +1,10 @@
 package samsaydali.l.services.scope;
 
 import samsaydali.l.ast.common.Identifier;
+import samsaydali.l.ast.functions.Argument;
+import samsaydali.l.ast.functions.FunctionDef;
+
+import java.util.List;
 
 public class ScopeService {
 
@@ -23,6 +27,14 @@ public class ScopeService {
 
     public Identifier getIdentifier(String id) throws IdentifierNotFoundInScope {
         return currentScope.getIdentifier(id);
+    }
+
+    public void addFunction(FunctionDef def) throws IdentifierAlreadyInScope {
+        currentScope.addFunction(def);
+    }
+
+    public FunctionDef getFunctionDef(String id, List<Argument> arguments) throws IdentifierNotFoundInScope {
+        return currentScope.getFunction(id, arguments);
     }
 
 }

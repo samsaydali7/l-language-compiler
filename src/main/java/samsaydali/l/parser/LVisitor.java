@@ -66,7 +66,9 @@ public class LVisitor extends LBaseVisitor {
         }
         Assign assign = buildAssign(ctx.assign(), new Type(ctx.type().getText()));
         scope.closeScope();
-        return new FunctionDef(name, parameters, assign);
+        FunctionDef def = new FunctionDef(name, parameters, assign);
+        scope.addFunction(def);
+        return def;
     }
 
     @Override
@@ -78,6 +80,8 @@ public class LVisitor extends LBaseVisitor {
             Expression expression = buildExpression(arg.expression());
             arguments.add(new Argument(i, expression));
         }
+        // Validate function exists and it's arguments
+        scope.getFunctionDef(name, arguments);
         return new FunctionCall(name, arguments);
     }
 

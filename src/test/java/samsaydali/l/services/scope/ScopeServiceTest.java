@@ -1,8 +1,13 @@
 package samsaydali.l.services.scope;
 
 import org.junit.jupiter.api.Test;
-import samsaydali.l.ast.common.Identifier;
-import samsaydali.l.ast.common.Type;
+import samsaydali.l.ast.common.*;
+import samsaydali.l.ast.functions.Argument;
+import samsaydali.l.ast.functions.FunctionCall;
+import samsaydali.l.ast.functions.FunctionDef;
+import samsaydali.l.ast.functions.Parameter;
+
+import java.util.LinkedList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -64,6 +69,138 @@ class ScopeServiceTest {
             assertThrows(IdentifierNotFoundInScope.class, () -> {
                 scopeService.getIdentifier("y");
             });
+        });
+    }
+
+    @Test
+    public void canAddFunctionAndValidate() {
+        ScopeService scopeService = new ScopeService();
+
+        Identifier a = new Identifier("a", new Type("Int"));
+        Identifier b = new Identifier("b", new Type("Int"));
+        Identifier a1 = new Identifier("b", new Type("Int"));
+        Identifier b1 = new Identifier("b", new Type("Int"));
+
+        FunctionDef def = new FunctionDef("fun", new LinkedList<Parameter>(){{
+            add(new Parameter(a, 0));
+            add(new Parameter(b, 1));
+        }}, Assign.builder().build());
+
+        scopeService.addFunction(def);
+
+        FunctionCall call = new FunctionCall("fun", new LinkedList<Argument>(){{
+            add(new Argument(0, Expression.builder()
+                    .expressionType(Expression.ExpressionType.BINARY)
+                    .op("+")
+                    .lhs(Expression.builder().expressionType(Expression.ExpressionType.VALUE).value(new Value(new Type("Int"), "2")).build())
+                    .rhs(Expression.builder().expressionType(Expression.ExpressionType.ID).ID(a1).build())
+                    .build()));
+            add(new Argument(1, Expression.builder()
+                    .expressionType(Expression.ExpressionType.ID)
+                    .ID(b1)
+                    .build()));
+        }});
+
+        assertAll(() -> {
+            scopeService.getFunctionDef(call.getName(), call.getArguments());
+        });
+    }
+
+    @Test
+    public void canAddFunctionAndThrowForArgumentSize() {
+        ScopeService scopeService = new ScopeService();
+
+        Identifier a = new Identifier("a", new Type("Int"));
+        Identifier b = new Identifier("b", new Type("Int"));
+        Identifier a1 = new Identifier("b", new Type("Int"));
+        Identifier b1 = new Identifier("b", new Type("Int"));
+
+        FunctionDef def = new FunctionDef("fun", new LinkedList<Parameter>(){{
+            add(new Parameter(a, 0));
+            add(new Parameter(b, 1));
+        }}, Assign.builder().build());
+
+        scopeService.addFunction(def);
+
+        FunctionCall call = new FunctionCall("fun", new LinkedList<Argument>(){{
+            add(new Argument(0, Expression.builder()
+                    .expressionType(Expression.ExpressionType.BINARY)
+                    .op("+")
+                    .lhs(Expression.builder().expressionType(Expression.ExpressionType.VALUE).value(new Value(new Type("Int"), "2")).build())
+                    .rhs(Expression.builder().expressionType(Expression.ExpressionType.ID).ID(a1).build())
+                    .build()));
+        }});
+
+        assertThrows(ArgumentsNotCompliantWithParametersList.class, () -> {
+            scopeService.getFunctionDef(call.getName(), call.getArguments());
+        });
+    }
+
+    @Test
+    public void canAddFunctionAndThrowForArgumentNonCompliant() {
+        ScopeService scopeService = new ScopeService();
+
+        Identifier a = new Identifier("a", new Type("Int"));
+        Identifier b = new Identifier("b", new Type("Int"));
+        Identifier a1 = new Identifier("b", new Type("Int"));
+        Identifier b1 = new Identifier("b", new Type("String"));
+
+        FunctionDef def = new FunctionDef("fun", new LinkedList<Parameter>(){{
+            add(new Parameter(a, 0));
+            add(new Parameter(b, 1));
+        }}, Assign.builder().build());
+
+        scopeService.addFunction(def);
+
+        FunctionCall call = new FunctionCall("fun", new LinkedList<Argument>(){{
+            add(new Argument(0, Expression.builder()
+                    .expressionType(Expression.ExpressionType.BINARY)
+                    .op("+")
+                    .lhs(Expression.builder().expressionType(Expression.ExpressionType.VALUE).value(new Value(new Type("Int"), "2")).build())
+                    .rhs(Expression.builder().expressionType(Expression.ExpressionType.ID).ID(a1).build())
+                    .build()));
+            add(new Argument(1, Expression.builder()
+                    .expressionType(Expression.ExpressionType.ID)
+                    .ID(b1)
+                    .build()));
+        }});
+
+        assertThrows(ArgumentsNotCompliantWithParametersList.class, () -> {
+            scopeService.getFunctionDef(call.getName(), call.getArguments());
+        });
+    }
+
+    @Test
+    public void canAddFunctionAndThrowForExpressionTypeMismatch() {
+        ScopeService scopeService = new ScopeService();
+
+        Identifier a = new Identifier("a", new Type("Int"));
+        Identifier b = new Identifier("b", new Type("Int"));
+        Identifier a1 = new Identifier("b", new Type("Int"));
+        Identifier b1 = new Identifier("b", new Type("Int"));
+
+        FunctionDef def = new FunctionDef("fun", new LinkedList<Parameter>(){{
+            add(new Parameter(a, 0));
+            add(new Parameter(b, 1));
+        }}, Assign.builder().build());
+
+        scopeService.addFunction(def);
+
+        FunctionCall call = new FunctionCall("fun", new LinkedList<Argument>(){{
+            add(new Argument(0, Expression.builder()
+                    .expressionType(Expression.ExpressionType.BINARY)
+                    .op("+")
+                    .lhs(Expression.builder().expressionType(Expression.ExpressionType.VALUE).value(new Value(new Type("String"), "2")).build())
+                    .rhs(Expression.builder().expressionType(Expression.ExpressionType.ID).ID(a1).build())
+                    .build()));
+            add(new Argument(1, Expression.builder()
+                    .expressionType(Expression.ExpressionType.ID)
+                    .ID(b1)
+                    .build()));
+        }});
+
+        assertThrows(Expression.LhsRhsTypeMismatchException.class, () -> {
+            scopeService.getFunctionDef(call.getName(), call.getArguments());
         });
     }
 }

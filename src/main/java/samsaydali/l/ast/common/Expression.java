@@ -33,7 +33,7 @@ public class Expression {
         throw new LhsRhsTypeMismatchException("LhsRhsTypeMismatchException");
     }
 
-    static class LhsRhsTypeMismatchException extends Exception {
+    public static class LhsRhsTypeMismatchException extends RuntimeException {
 
         public LhsRhsTypeMismatchException(String message) {
             super(message);
