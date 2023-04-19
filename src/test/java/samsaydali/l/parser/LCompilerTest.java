@@ -1,6 +1,7 @@
 package samsaydali.l.parser;
 
 import org.junit.jupiter.api.Test;
+import samsaydali.l.app.LCompiler;
 import samsaydali.l.ast.common.*;
 import samsaydali.l.ast.functions.Argument;
 import samsaydali.l.ast.functions.FunctionCall;
@@ -14,7 +15,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class LParserAppTest {
+class LCompilerTest {
 
     String input1 = "def mul[x: Int, y: Int]: Int <- x * y;\n";
     String input2 = "var x: Int <- 2;\n";
@@ -23,8 +24,8 @@ class LParserAppTest {
 
     @Test
     void parseInput1() {
-        LParserApp app = new LParserApp();
-        LVisitor v = app.parse(input1);
+        LCompiler app = new LCompiler();
+        LVisitor v = app.visit(input1);
         FunctionDef functionDef = (FunctionDef) v.statements.get(0);
 
         // Compare func name
@@ -61,8 +62,8 @@ class LParserAppTest {
 
     @Test
     void parseInput2() {
-        LParserApp app = new LParserApp();
-        LVisitor v = app.parse(input2);
+        LCompiler app = new LCompiler();
+        LVisitor v = app.visit(input2);
         VariableDef def = (VariableDef) v.statements.get(0);
 
         Expression e = Expression.builder()
@@ -81,8 +82,8 @@ class LParserAppTest {
 
     @Test
     void parseInput3() {
-        LParserApp app = new LParserApp();
-        LVisitor v = app.parse(input2 + input3);
+        LCompiler app = new LCompiler();
+        LVisitor v = app.visit(input2 + input3);
         VariableDef def = (VariableDef) v.statements.get(1);
         VariableAssign variableAssign = (VariableAssign) v.statements.get(2);
 
@@ -116,8 +117,8 @@ class LParserAppTest {
 
     @Test
     void parseInput4() {
-        LParserApp app = new LParserApp();
-        LVisitor v = app.parse(input1 + input2 + input3 + input4);
+        LCompiler app = new LCompiler();
+        LVisitor v = app.visit(input1 + input2 + input3 + input4);
         FunctionCall call = (FunctionCall) v.statements.get(4);
 
         // Compare func name

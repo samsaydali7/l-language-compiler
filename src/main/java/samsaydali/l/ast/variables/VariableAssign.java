@@ -12,4 +12,9 @@ import samsaydali.l.ast.common.Identifier;
 public class VariableAssign implements Statement {
     private Identifier identifier;
     private Assign assign;
+
+    @Override
+    public String getType() {
+        return "variable_assign";
+    }
 }

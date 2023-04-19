@@ -15,6 +15,17 @@ public class Expression {
         BINARY, UNARY, ID, VALUE
     }
 
+    public String getText() {
+        switch (expressionType) {
+            case VALUE: return value.value;
+            case UNARY: return op + " " + rhs.getText();
+            case BINARY:
+                return lhs.getText() + " " + op + " " + rhs.getText();
+            case ID: return ID.getName();
+        }
+        return ID.getName();
+    }
+
     // Todo: Move all below to a service
     public Type resultType() throws LhsRhsTypeMismatchException {
         switch (expressionType) {

@@ -15,4 +15,9 @@ import java.util.List;
 public class FunctionCall implements Statement {
     String name;
     List<Argument> arguments;
+
+    @Override
+    public String getType() {
+        return "function_call";
+    }
 }

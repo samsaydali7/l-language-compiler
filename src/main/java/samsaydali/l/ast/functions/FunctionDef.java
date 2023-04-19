@@ -17,4 +17,9 @@ public class FunctionDef implements Statement {
     String name;
     List<Parameter> parameters;
     Assign assign;
+
+    @Override
+    public String getType() {
+        return "function_def";
+    }
 }

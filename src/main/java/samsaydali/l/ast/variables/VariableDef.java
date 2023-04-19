@@ -12,4 +12,9 @@ public class VariableDef implements Statement {
     private Identifier identifier;
     private Boolean initialized;
     private Assign assign;
+
+    @Override
+    public String getType() {
+        return "variable_def";
+    }
 }
